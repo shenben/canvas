@@ -14,7 +14,7 @@ inline enum rdma_queue_type get_qp_type(int idx) {
   if (type < NUM_QP_TYPE) {
     return (enum rdma_queue_type)type;
   } else {
-    printf("wrong rdma queue type %d\n", idx / online_cores);
+    printf("[get_qp_type] wrong rdma queue type %d out of total %d\n", idx / online_cores, NUM_QP_TYPE);
     return QP_STORE;
   }
 
@@ -26,7 +26,7 @@ inline struct rswap_rdma_queue *get_rdma_queue(unsigned int cpu,
   if (type < NUM_QP_TYPE) {
     return &global_rdma_ctx->rdma_queues[cpu + type * online_cores];
   } else {
-    printf("wrong rdma queue type %d\n", type);
+    printf("[get_rdma_queue] wrong rdma queue type %d out of total %d\n", type, NUM_QP_TYPE);
     return NULL;
   }
   return NULL;
