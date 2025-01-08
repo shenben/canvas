@@ -1,10 +1,10 @@
 #ifndef __RSWAP_SERVER_HPP
 #define __RSWAP_SERVER_HPP
-
 #include <errno.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
