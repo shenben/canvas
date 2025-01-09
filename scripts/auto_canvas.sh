@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 sudo apt update
-sudo apt -y install build-essential bc flex bison pkg-config libssl-dev libelf-dev openssl
+sudo apt install -y build-essential bc flex bison pkg-config libssl-dev libelf-dev openssl
 sudo apt install -y python-libxml2 gfortran swig dpatch tcl quilt  libltdl-dev libnl-route-3-200 debhelper tk graphviz chrpath pkg-config
 sudo mkfs -t ext4 /dev/nvme0n1p4 
 sudo mkdir -p /mnt/data
