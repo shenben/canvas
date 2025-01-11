@@ -111,7 +111,7 @@ int rswap_replace_frontswap(void)
 	return 0;
 }
 
-int rswap_client_init(char *server_ip, int server_port, int mem_size)
+int rswap_client_init(char *server_ip, int server_port, int mem_sizem, int cpu_num)
 {
 	return rswap_init_local_dram(mem_size);
 }

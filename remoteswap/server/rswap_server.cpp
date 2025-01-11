@@ -10,7 +10,7 @@ int rdma_num_queues = 0;
 
 inline enum rdma_queue_type get_qp_type(int idx) {
   unsigned type = idx / online_cores;
-
+  fprintf(stderr, "%s, initial type: %u\n", __func__, type);
   if (type < NUM_QP_TYPE) {
     return (enum rdma_queue_type)type;
   } else {
@@ -171,11 +171,11 @@ int on_connect_request(struct rdma_cm_id *id) {
   rdma_queue = &(global_rdma_ctx->rdma_queues[rdma_queue_count]);
   rdma_queue->q_index = rdma_queue_count;
   rdma_queue->type = get_qp_type(rdma_queue_count);
+  fprintf(stderr, "%s, final type: %u\n", __func__, rdma_queue->type);
   rdma_queue_count++;
   rdma_queue->cm_id = id;
 
-  fprintf(stderr, "%s, rdma_queue[%d] received connection request.\n", __func__,
-          rdma_queue_count - 1);
+  fprintf(stderr, "%s, rdma_queue[%d] received connection request.\n", __func__, rdma_queue_count - 1);
   build_connection(rdma_queue);
   build_params(&cm_params);
   TEST_NZ(rdma_accept(id, &cm_params));
@@ -192,8 +192,7 @@ void build_connection(struct rswap_rdma_queue *rdma_queue) {
   get_device_info(rdma_queue);
   build_qp_attr(rdma_queue, &qp_attr);
 
-  TEST_NZ(rdma_create_qp(rdma_queue->cm_id, global_rdma_ctx->rdma_dev->pd,
-                         &qp_attr));
+  TEST_NZ(rdma_create_qp(rdma_queue->cm_id, global_rdma_ctx->rdma_dev->pd, &qp_attr));
   rdma_queue->qp = rdma_queue->cm_id->qp;
 
   rdma_queue->cm_id->context = rdma_queue;

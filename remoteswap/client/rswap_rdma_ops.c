@@ -473,12 +473,15 @@ int rswap_replace_frontswap(void)
 	return 0;
 }
 
-int rswap_client_init(char *_server_ip, int _server_port, int _mem_size)
+int rswap_client_init(char *_server_ip, int _server_port, int _mem_size, int cpu_num)
 {
 	int ret = 0;
 	pr_info("%s, start \n", __func__);
 
-	online_cores = num_online_cpus();
+	// online_cores = num_online_cpus();
+	online_cores = cpu_num;
+	pr_info("%s, online_cores: %d\n", __func__, online_cores);
+
 	num_queues = online_cores * NUM_QP_TYPE;
 	server_ip = _server_ip;
 	server_port = _server_port;
