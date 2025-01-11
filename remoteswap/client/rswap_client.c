@@ -22,19 +22,22 @@ MODULE_VERSION("1.0");
 static char server_ip[INET_ADDRSTRLEN];
 static int server_port;
 static int remote_mem_size;
+static int cpu_num;
 
 MODULE_PARM_DESC(sip, "Remote memory server ip address");
 MODULE_PARM_DESC(sport, "Remote memory server port");
 MODULE_PARM_DESC(rmsize, "Remote memory size in GB");
+MODULE_PARM_DESC(cpunum, "CPU cores used in compute server");
 module_param_string(sip, server_ip, INET_ADDRSTRLEN, 0644);
 module_param_named(sport, server_port, int, 0644);
 module_param_named(rmsize, remote_mem_size, int, 0644);
+module_param_named(cpunum, cpu_num, int, 0644);
 
 int __init rswap_cpu_init(void)
 {
 	int ret = 0;
 
-	ret = rswap_client_init(server_ip, server_port, remote_mem_size);
+	ret = rswap_client_init(server_ip, server_port, remote_mem_size, cpu_num);
 	if (unlikely(ret)) {
 		pr_err("%s, rswap_rdma_client_init failed. \n", __func__);
 		goto out;
@@ -42,6 +45,7 @@ int __init rswap_cpu_init(void)
 
 #ifdef RSWAP_KERNEL_SUPPORT
 	if (!frontswap_enabled()) {
+		pr_info("frontswap_enabled == false, going to register frontswap");
 		ret = rswap_register_frontswap();
 		if (unlikely(ret)) {
 			pr_err("%s, Enable frontswap path failed. \n",
@@ -49,6 +53,7 @@ int __init rswap_cpu_init(void)
 			goto out;
 		}
 	} else {
+		pr_info("frontswap_enabled == true, going to replace frontswap");
 		rswap_replace_frontswap();
 	}
 #else

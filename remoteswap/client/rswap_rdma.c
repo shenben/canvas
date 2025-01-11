@@ -61,13 +61,13 @@ int handle_recv_wr(struct rswap_rdma_queue *rdma_queue, struct ib_wc *wc)
 	}
 
 	if (unlikely(rdma_queue->state < CONNECTED)) {
-		pr_debug("%s, RDMA is not connected\n", __func__);
+		pr_info("%s, RDMA is not connected\n", __func__);
 		return -1;
 	}
 
 	switch (rdma_session->rdma_recv_req.recv_buf->type) {
 	case AVAILABLE_TO_QUERY:
-		pr_debug(
+		pr_info(
 			"%s, Received AVAILABLE_TO_QUERY, memory server is prepared well. We can query\n ",
 			__func__);
 		rdma_queue->state = MEMORY_SERVER_AVAILABLE;
@@ -126,7 +126,7 @@ void two_sided_message_done(struct ib_cq *cq, struct ib_wc *wc)
 
 	switch (wc->opcode) {
 	case IB_WC_RECV:
-		pr_debug("%s, Got a WC from CQ, IB_WC_RECV. \n", __func__);
+		pr_info("%s, Got a WC from CQ, IB_WC_RECV. \n", __func__);
 		ret = handle_recv_wr(rdma_queue, wc);
 		if (unlikely(ret)) {
 			pr_err("%s, recv wc error: %d\n", __func__, ret);
@@ -134,7 +134,7 @@ void two_sided_message_done(struct ib_cq *cq, struct ib_wc *wc)
 		}
 		break;
 	case IB_WC_SEND:
-		pr_debug("%s, Got a WC from CQ, IB_WC_SEND. 2-sided "
+		pr_info("%s, Got a WC from CQ, IB_WC_SEND. 2-sided "
 			 "RDMA post done. \n",
 			 __func__);
 		break;
@@ -171,7 +171,7 @@ int send_message_to_remote(struct rdma_session_context *rdma_session,
 	}
 	atomic_inc(&rdma_queue->rdma_post_counter);
 
-	pr_debug("Send a Message to memory server. send_buf->type : %d, %s \n",
+	pr_info("Send a Message to memory server. send_buf->type : %d, %s \n",
 		 message_type, rdma_message_print(message_type));
 	ret = ib_post_send(rdma_queue->qp, &rdma_session->rdma_send_req.sq_wr,
 			   &send_bad_wr);
@@ -250,12 +250,12 @@ int rswap_rdma_cm_event_handler(struct rdma_cm_id *cma_id,
 	int ret = 0;
 	struct rswap_rdma_queue *rdma_queue = cma_id->context;
 
-	pr_debug("cma_event type %d, type_name: %s \n", event->event,
+	pr_info("cma_event type %d, type_name: %s \n", event->event,
 		 rdma_cm_message_print(event->event));
 	switch (event->event) {
 	case RDMA_CM_EVENT_ADDR_RESOLVED:
 		rdma_queue->state = ADDR_RESOLVED;
-		pr_debug(
+		pr_info(
 			"%s,  get RDMA_CM_EVENT_ADDR_RESOLVED. Send RDMA_ROUTE_RESOLVE to Memory server \n",
 			__func__);
 
@@ -266,7 +266,7 @@ int rswap_rdma_cm_event_handler(struct rdma_cm_id *cma_id,
 		}
 		break;
 	case RDMA_CM_EVENT_ROUTE_RESOLVED:
-		pr_debug(
+		pr_info(
 			"%s : RDMA_CM_EVENT_ROUTE_RESOLVED, wake up rdma_queue->sem\n ",
 			__func__);
 
@@ -277,7 +277,7 @@ int rswap_rdma_cm_event_handler(struct rdma_cm_id *cma_id,
 		pr_info("Receive but Not Handle : RDMA_CM_EVENT_CONNECT_REQUEST \n");
 		break;
 	case RDMA_CM_EVENT_ESTABLISHED:
-		pr_debug("%s, ESTABLISHED, wake up rdma_queue->sem\n",
+		pr_info("%s, ESTABLISHED, wake up rdma_queue->sem\n",
 			 __func__);
 		rdma_queue->state = CONNECTED;
 		wake_up_interruptible(&rdma_queue->sem);
@@ -297,11 +297,11 @@ int rswap_rdma_cm_event_handler(struct rdma_cm_id *cma_id,
 		pr_info("%s, Receive DISCONNECTED  signal \n", __func__);
 
 		if (rdma_queue->freed) {
-			pr_debug(
+			pr_info(
 				"%s, RDMA disconnect evetn, requested by client. \n",
 				__func__);
 		} else {
-			pr_debug(
+			pr_info(
 				"%s, RDMA disconnect evetn, requested by client. \n",
 				__func__);
 			rdma_disconnect(rdma_queue->cm_id);
@@ -435,14 +435,14 @@ int rswap_create_rdma_queue(struct rdma_session_context *rdma_session,
 		ret = PTR_ERR(rdma_queue->cq);
 		goto err;
 	}
-	pr_debug("%s, created cq %p\n", __func__, rdma_queue->cq);
+	pr_info("%s, created cq %p\n", __func__, rdma_queue->cq);
 
 	ret = rswap_create_qp(rdma_session, rdma_queue);
 	if (ret) {
 		pr_err("%s, failed: %d\n", __func__, ret);
 		goto err;
 	}
-	pr_debug("%s, created qp %p\n", __func__, rdma_queue->qp);
+	pr_info("%s, created qp %p\n", __func__, rdma_queue->qp);
 
 err:
 	return ret;
@@ -498,18 +498,18 @@ int rswap_setup_buffers(struct rdma_session_context *rdma_session)
 				  rdma_session->rdma_send_req.send_buf,
 				  sizeof(struct message), DMA_BIDIRECTIONAL);
 
-	pr_debug("%s, Got dma/bus address 0x%llx, for the recv_buf 0x%llx \n",
+	pr_info("%s, Got dma/bus address 0x%llx, for the recv_buf 0x%llx \n",
 		 __func__,
 		 (unsigned long long)rdma_session->rdma_recv_req.recv_dma_addr,
 		 (unsigned long long)rdma_session->rdma_recv_req.recv_buf);
-	pr_debug("%s, Got dma/bus address 0x%llx, for the send_buf 0x%llx \n",
+	pr_info("%s, Got dma/bus address 0x%llx, for the send_buf 0x%llx \n",
 		 __func__,
 		 (unsigned long long)rdma_session->rdma_send_req.send_dma_addr,
 		 (unsigned long long)rdma_session->rdma_send_req.send_buf);
 
 	rswap_setup_message_wr(rdma_session);
-	pr_debug("%s, allocated & registered buffers...\n", __func__);
-	pr_debug("%s is done. \n", __func__);
+	pr_info("%s, allocated & registered buffers...\n", __func__);
+	pr_info("%s is done. \n", __func__);
 
 	return ret;
 }
@@ -708,15 +708,18 @@ int rdma_session_connect(struct rdma_session_context *rdma_session)
 	int i;
 
 	for (i = 0; i < num_queues; i++) {
+		pr_info("%s, RDMA queue[%d/%d] is going to init \n", __func__, i, num_queues);
 		ret = rswap_init_rdma_queue(rdma_session, i);
 		if (unlikely(ret)) {
 			pr_err("%s,init rdma queue [%d] failed.\n", __func__,
 			       i);
 		}
+		pr_info("%s, RDMA queue[%d/%d] is going to create \n", __func__, i, num_queues);
 		ret = rswap_create_rdma_queue(rdma_session, i);
 		if (unlikely(ret)) {
 			pr_err("%s, Create rdma queues failed. \n", __func__);
 		}
+		pr_info("%s, RDMA queue[%d/%d] is going to connect to server \n", __func__, i, num_queues);
 		ret = rswap_connect_remote_memory_server(rdma_session, i);
 		if (unlikely(ret)) {
 			pr_err("%s: Connect to remote server error \n",
@@ -761,7 +764,7 @@ void rswap_free_buffers(struct rdma_session_context *rdma_session)
 	if (rdma_session->remote_mem_pool.chunks != NULL)
 		kfree(rdma_session->remote_mem_pool.chunks);
 
-	pr_debug("%s, Free RDMA buffers done. \n", __func__);
+	pr_info("%s, Free RDMA buffers done. \n", __func__);
 }
 
 void rswap_free_rdma_structure(struct rdma_session_context *rdma_session)
@@ -776,26 +779,26 @@ void rswap_free_rdma_structure(struct rdma_session_context *rdma_session)
 		rdma_queue = &(rdma_session->rdma_queues[i]);
 		if (rdma_queue->cm_id != NULL) {
 			rdma_destroy_id(rdma_queue->cm_id);
-			pr_debug("%s, free rdma_queue[%d] rdma_cm_id done. \n",
+			pr_info("%s, free rdma_queue[%d] rdma_cm_id done. \n",
 				 __func__, i);
 		}
 		if (rdma_queue->qp != NULL) {
 			ib_destroy_qp(rdma_queue->qp);
-			pr_debug("%s, free rdma_queue[%d] ib_qp  done. \n",
+			pr_info("%s, free rdma_queue[%d] ib_qp  done. \n",
 				 __func__, i);
 		}
 		if (rdma_queue->cq != NULL) {
 			ib_destroy_cq(rdma_queue->cq);
-			pr_debug("%s, free rdma_queue[%d] ib_cq  done. \n",
+			pr_info("%s, free rdma_queue[%d] ib_cq  done. \n",
 				 __func__, i);
 		}
 	}
 
 	if (rdma_session->rdma_dev->pd != NULL) {
 		ib_dealloc_pd(rdma_session->rdma_dev->pd);
-		pr_debug("%s, Free device PD  done. \n", __func__);
+		pr_info("%s, Free device PD  done. \n", __func__);
 	}
-	pr_debug("%s, Free RDMA structures,cm_id,qp,cq,pd done. \n", __func__);
+	pr_info("%s, Free RDMA structures,cm_id,qp,cq,pd done. \n", __func__);
 }
 
 int rswap_disconnect_and_collect_resource(
@@ -822,7 +825,7 @@ int rswap_disconnect_and_collect_resource(
 				goto err;
 			}
 		}
-		pr_debug(
+		pr_info(
 			"%s, RDMA queue[%d] disconnected, start to free resoutce. \n",
 			__func__, i);
 	}
@@ -833,7 +836,7 @@ int rswap_disconnect_and_collect_resource(
 
 	rswap_free_buffers(rdma_session);
 	rswap_free_rdma_structure(rdma_session);
-	pr_debug("%s, RDMA memory resouce freed. \n", __func__);
+	pr_info("%s, RDMA memory resouce freed. \n", __func__);
 err:
 	return ret;
 }

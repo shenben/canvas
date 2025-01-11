@@ -10,7 +10,7 @@ int rdma_num_queues = 0;
 
 inline enum rdma_queue_type get_qp_type(int idx) {
   unsigned type = idx / online_cores;
-
+  fprintf(stderr, "%s, initial type: %u\n", __func__, type);
   if (type < NUM_QP_TYPE) {
     return (enum rdma_queue_type)type;
   } else {
@@ -108,9 +108,7 @@ void init_memory_pool(struct context *rdma_ctx) {
   size_t REGION_SIZE = ONE_GB * REGION_SIZE_GB;
   size_t heap_size = REGION_SIZE * region_num;
   void *heap_start = malloc(heap_size);
-  print_debug(stderr, "%s, Register Semeru Space: 0x%llx, size : 0x%llx. \n",
-              __func__, (unsigned long long)heap_start,
-              (unsigned long long)heap_size);
+  fprintf(stderr, "%s, Register Semeru Space: 0x%llx, size : 0x%llx. \n", __func__, (unsigned long long)heap_start, (unsigned long long)heap_size);
 
   rdma_ctx->mem_pool->heap_start = (char *)heap_start;
   rdma_ctx->mem_pool->region_num = region_num;
@@ -119,7 +117,7 @@ void init_memory_pool(struct context *rdma_ctx) {
   rdma_ctx->mem_pool->region_mapped_size[0] = REGION_SIZE;
   rdma_ctx->mem_pool->cache_status[0] = -1;
 
-  print_debug(stderr,
+  fprintf(stderr,
               "%s, Prepare to register memory Region[%d] (Meta DATA)  : "
               "0x%llx, size 0x%lx\n",
               __func__, 0,
@@ -132,15 +130,15 @@ void init_memory_pool(struct context *rdma_ctx) {
     rdma_ctx->mem_pool->region_mapped_size[i] = REGION_SIZE;
     rdma_ctx->mem_pool->cache_status[i] = -1;
 
-    print_debug(stderr,
+    fprintf(stderr,
                 "%s, Prepare to register memory Region[%d] (Object DATA) : "
                 "0x%llx, size 0x%lx\n",
                 __func__, i,
                 (unsigned long long)rdma_ctx->mem_pool->region_list[i],
                 (size_t)rdma_ctx->mem_pool->region_mapped_size[i]);
   }
-  print_debug(stderr, "Registered %llu GB (whole head) as RDMA Buffer\n",
-              (unsigned long long)heap_size / ONE_GB);
+  fprintf(stderr, "%s, Registered %llu GB (whole head) as RDMA Buffer\n",
+              __func__, (unsigned long long)heap_size / ONE_GB);
 
   return;
 }
@@ -151,13 +149,13 @@ int on_cm_event(struct rdma_cm_event *event) {
       (struct rswap_rdma_queue *)event->id->context;
 
   if (event->event == RDMA_CM_EVENT_CONNECT_REQUEST) {
-    print_debug(stderr, "Get RDMA_CM_EVENT_CONNECT_REQUEST\n");
+    fprintf(stderr, "Get RDMA_CM_EVENT_CONNECT_REQUEST\n");
     r = on_connect_request(event->id);
   } else if (event->event == RDMA_CM_EVENT_ESTABLISHED) {
-    print_debug(stderr, "Get RDMA_CM_EVENT_ESTABLISHED\n");
+    fprintf(stderr, "Get RDMA_CM_EVENT_ESTABLISHED\n");
     r = rdma_connected(rdma_queue);
   } else if (event->event == RDMA_CM_EVENT_DISCONNECTED) {
-    print_debug(stderr, "Get RDMA_CM_EVENT_DISCONNECTED\n");
+    fprintf(stderr, "Get RDMA_CM_EVENT_DISCONNECTED\n");
     r = on_disconnect(rdma_queue);
   } else {
     die("on_cm_event: unknown event.");
@@ -173,11 +171,11 @@ int on_connect_request(struct rdma_cm_id *id) {
   rdma_queue = &(global_rdma_ctx->rdma_queues[rdma_queue_count]);
   rdma_queue->q_index = rdma_queue_count;
   rdma_queue->type = get_qp_type(rdma_queue_count);
+  fprintf(stderr, "%s, final type: %u\n", __func__, rdma_queue->type);
   rdma_queue_count++;
   rdma_queue->cm_id = id;
 
-  fprintf(stderr, "%s, rdma_queue[%d] received connection request.\n", __func__,
-          rdma_queue_count - 1);
+  fprintf(stderr, "%s, rdma_queue[%d] received connection request.\n", __func__, rdma_queue_count - 1);
   build_connection(rdma_queue);
   build_params(&cm_params);
   TEST_NZ(rdma_accept(id, &cm_params));
@@ -194,8 +192,7 @@ void build_connection(struct rswap_rdma_queue *rdma_queue) {
   get_device_info(rdma_queue);
   build_qp_attr(rdma_queue, &qp_attr);
 
-  TEST_NZ(rdma_create_qp(rdma_queue->cm_id, global_rdma_ctx->rdma_dev->pd,
-                         &qp_attr));
+  TEST_NZ(rdma_create_qp(rdma_queue->cm_id, global_rdma_ctx->rdma_dev->pd, &qp_attr));
   rdma_queue->qp = rdma_queue->cm_id->qp;
 
   rdma_queue->cm_id->context = rdma_queue;
@@ -359,7 +356,7 @@ int rdma_connected(struct rswap_rdma_queue *rdma_queue) {
               IBV_ACCESS_REMOTE_READ);
 
       if (rdma_session->mem_pool->mr_buffer[i] != NULL) {
-        print_debug(
+        fprintf(
             stderr,
             "Register Region[%d] : 0x%llx to RDMA Buffer[%d] : 0x%llx, "
             "rkey: "
@@ -369,11 +366,11 @@ int rdma_connected(struct rswap_rdma_queue *rdma_queue) {
             (unsigned long long)rdma_session->mem_pool->mr_buffer[i]->rkey,
             (unsigned long)rdma_session->mem_pool->region_mapped_size[i]);
       } else {
-        print_debug(
+        fprintf(
             stderr,
             "%s, region[%d], 0x%lx is registered wrongly, with NULL. \n",
             __func__, i, (size_t)rdma_session->mem_pool->region_list[i]);
-        print_debug(stderr, "ERROR in %s, %s\n", __func__, strerror(errno));
+        fprintf(stderr, "ERROR in %s, %s\n", __func__, strerror(errno));
         succ = false;
       }
     }
