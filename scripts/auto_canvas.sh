@@ -24,15 +24,17 @@ popd
 # GRUB_DEFAULT="Advanced options for Ubuntu>Ubuntu, with Linux 5.5.0-canvas"
 
 # # Change the value of GRUB_CMDLINE_LINUX to set transparent hugepage as madvise:
-# GRUB_CMDLINE_LINUX="transparent_hugepage=madvise"
+# GRUB_CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all transparent_hugepage=madvise"
 
 # # Apply the change
 # sudo update-grub
 
 #sudo reboot
+sudo mount /dev/nvme0n1p4 /mnt/data
 cd /mnt/data/
-wget https://content.mellanox.com/ofed/MLNX_OFED-5.0-2.1.8.0/MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64.tgz
-tar xzf MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64.tgz
+#wget https://content.mellanox.com/ofed/MLNX_OFED-5.0-2.1.8.0/MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64.tgz
+#tar xzf MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64.tgz
+cp -r /proj/rdmatestbench-PG0/tarfiles/MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64 ./
 cd MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64
 
 sudo apt remove ibverbs-providers:amd64 librdmacm1:amd64 librdmacm-dev:amd64 libibverbs-dev:amd64 libosmvendor4 -y
