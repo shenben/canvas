@@ -12,7 +12,7 @@ git clone https://github.com/shenben/canvas.git && \
 # ln -s /mnt/data/canvas $HOME/canvas
 cd canvas && \
 cd linux-5.5 && \
-cp config .config && \
+cp config .config && \ 
 sudo ./build_kernel.sh build && \
 sudo ./build_kernel.sh install && \
 sudo sed -i 's/CMDLINE_LINUX="/CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all transparent_hugepage=madvise /' /etc/default/grub && \
