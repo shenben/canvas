@@ -7,16 +7,16 @@ sudo mkfs -t ext4 /dev/nvme0n1p4  && \
 sudo mkdir -p /mnt/data && \
 sudo mount /dev/nvme0n1p4 /mnt/data && \
 sudo chmod 777 /mnt/data -R && \
-pushd /mnt/data && \
-git clone https://github.com/shenben/canvas.git
-ln -s /mnt/data/canvas $HOME/canvas
-popd
-pushd canvas
-pushd linux-5.5
-cp config .config
-sudo ./build_kernel.sh build
-sudo ./build_kernel.sh install
-popd
+cd /mnt/data && \
+git clone https://github.com/shenben/canvas.git && \
+# ln -s /mnt/data/canvas $HOME/canvas
+cd canvas && \
+cd linux-5.5 && \
+cp config .config && \
+sudo ./build_kernel.sh build && \
+sudo ./build_kernel.sh install && \
+sudo sed -i 's/CMDLINE_LINUX="/CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all transparent_hugepage=madvise /' /etc/default/grub && \
+sudo update-grub
 # Change the grub parameters (at least on CPU server) /etc/default/grub
 # sudo vim /etc/default/grub
 
@@ -37,8 +37,7 @@ cd /mnt/data/
 cp -r /proj/rdmatestbench-PG0/tarfiles/MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64 ./
 cd MLNX_OFED_LINUX-5.0-2.1.8.0-ubuntu20.04-x86_64
 
-sudo apt remove ibverbs-providers:amd64 librdmacm1:amd64 librdmacm-dev:amd64 libibverbs-dev:amd64 libosmvendor4 -y
+sudo apt remove ibverbs-providers:amd64 librdmacm1:amd64 librdmacm-dev:amd64 libibverbs-dev:amd64 libosmvendor4 -y && \
 
 sudo ./mlnxofedinstall --add-kernel-support
-
-popd
+sudo /etc/init.d/openibd restart
