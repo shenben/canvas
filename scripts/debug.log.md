@@ -1,4 +1,7 @@
 ## ConnectX-3 RNIC with IB switch; 
+
+*temporarily, canvas can go work smoothly!*
+
 * client communicate with server via IPoIB
 * It seems remote memory is pulled accordingly, but client side does not work right.
 

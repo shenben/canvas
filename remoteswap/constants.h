@@ -14,18 +14,18 @@
 
 // RDMA manage granularity, not the Heap Region.
 #ifndef REGION_SIZE_GB
-#define REGION_SIZE_GB ((size_t)4)
+#define REGION_SIZE_GB ((size_t)1)
 #endif
 
 #ifdef MAX_REGION_NUM
 #undef MAX_REGION_NUM
 #endif
-#define MAX_REGION_NUM 32 // up to 128GB remote memory
+#define MAX_REGION_NUM 8 // up to 128GB remote memory
 
 
 // number of segments, get from ibv_query_device. 
 // Check the hardware information and chang the number here.
 // For zion-# servers with ConnectX-3 IB, the hardware supports 32, but we can only use 30 here. Or it's not safe.
-#define MAX_REQUEST_SGL 30
+#define MAX_REQUEST_SGL 8
 
 #endif // __RSWAP_CONSTANTS_H
