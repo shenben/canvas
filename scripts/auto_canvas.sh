@@ -16,6 +16,7 @@ cp config .config && \
 sudo ./build_kernel.sh build && \
 sudo ./build_kernel.sh install && \
 sudo sed -i 's/CMDLINE_LINUX="/CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all transparent_hugepage=madvise /' /etc/default/grub && \
+sudo sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT="Advanced options for Ubuntu>Ubuntu, with Linux 5.5.0-canvas"/' /etc/default/grub && \
 sudo update-grub
 # Change the grub parameters (at least on CPU server) /etc/default/grub
 # sudo vim /etc/default/grub
