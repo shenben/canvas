@@ -43,7 +43,9 @@ cd /mnt/data/
 
 # sudo apt remove ibverbs-providers:amd64 librdmacm1:amd64 librdmacm-dev:amd64 libibverbs-dev:amd64 libosmvendor4 -y && \
 
-# sudo ./mlnxofedinstall --add-kernel-support
+# sudo ./mlnxofedinstall --add-kernel-support #Mellanox NICs
+# sudo ./mlnxofedinstall --add-kernel-support --without-fw-update --force
+#     # --without-fw-update and --force: required for non-Mellanox NICs
 # sudo /etc/init.d/openibd restart
 
 
